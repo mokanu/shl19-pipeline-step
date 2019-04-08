@@ -1,0 +1,38 @@
+plugins {
+    id("com.mkobit.jenkins.pipelines.shared-library") version "0.4.0"
+}
+apply plugin: 'groovy'
+apply plugin: 'jacoco'
+
+dependencies {
+    compile 'org.codehaus.groovy:groovy-all:2.4.14'
+    compile group: 'org.jenkins-ci.main', name: 'jenkins-core', version: '2.138.1'
+    compile group: 'org.jenkinsci.plugins', name: 'pipeline-model-definition', version: '1.3.2'
+
+    testCompile(group: 'junit', name: 'junit', version: '4.12')
+    testCompile(group: 'org.mockito', name: 'mockito-core', version: '2.8.9')
+    testCompile group:'com.lesfurets', name:'jenkins-pipeline-unit', version:'1.0'
+}
+
+test {
+    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+    testLogging {
+        events "passed", "skipped", "failed"
+        showStandardStreams = true
+        exceptionFormat = 'full'
+    }
+}
+
+jacoco {
+    toolVersion = '0.8.1'
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        html.enabled true
+        html.destination file("${buildDir}/reports/coverage")
+    }
+}
+
+check.dependsOn jacocoTestReport
